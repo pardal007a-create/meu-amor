@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Diário Perdido - Gravity Falls Love Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Permanent+Marker&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           1. RESET E FUNDO DA TELA
+           ========================================================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0b0504;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #22100d 20%, transparent 80%),
+                url('https://www.transparenttextures.com/patterns/black-thread.png');
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* CONTROLE DE MÚSICA (TOCA-FITAS) */
+        .audio-controller {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: #2b1612;
+            padding: 10px 15px;
+            border: 3px solid #7a1d17;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .audio-controller span {
+            font-family: 'Permanent Marker', cursive;
+            color: #ebd1a0;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .tape-icon {
+            width: 24px;
+            height: 15px;
+            border: 2px solid #ebd1a0;
+            border-radius: 3px;
+            position: relative;
+        }
+        .tape-icon::before, .tape-icon::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            width: 4px;
+            height: 4px;
+            background: #ebd1a0;
+            border-radius: 50%;
+        }
+        .tape-icon::before { left: 3px; }
+        .tape-icon::after { right: 3px; }
+
+        /* ==========================================================================
+           2. ESTRUTURA GIGANTE DO LIVRO (MÁXIMO REALISMO)
+           ========================================================================== */
+        .book-container {
+            width: 95vw;
+            max-width: 540px;
+            height: 85vh;
+            max-height: 780px;
+            position: relative;
+            perspective: 2500px;
+        }
+
+        .book {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 1.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .front, .back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            backface-visibility: hidden;
+            padding: 45px 35px;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.3), 5px 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .back {
+            transform: rotateY(180deg);
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        /* ==========================================================================
+           3. CAPA IDÊNTICA AO SEU ORIGINAL
+           ========================================================================== */
+        .cover {
+            background-image: url('capa.jpg');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 4px 24px 24px 4px;
+            position: relative;
+        }
+
+        .cover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 25px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(0,0,0,0.6), transparent);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .final-back-cover {
+            background-color: #3f1111 !important;
+            background-image: url('https://www.transparenttextures.com/patterns/leather.png');
+            border-radius: 24px 4px 4px 24px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        /* ==========================================================================
+           4. INTERIOR ESTILO PERGAMINHO ENVELHECIDO DE GRAVITY FALLS
+           ========================================================================== */
+        .page-journal {
+            background-color: #ebd1a0;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 0% 50%, rgba(140, 92, 60, 0.25) 0%, transparent 60%),
+                url('https://www.transparenttextures.com/patterns/parchment.png');
+            background-size: 100% 25px, 100% 100%, auto;
+            border-left: 6px solid rgba(48, 25, 13, 0.25);
+            border-radius: 2px 16px 16px 2px;
+        }
+
+        .page-journal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(40, 20, 10, 0.15), transparent);
+            pointer-events: none;
+        }
+
+        .back.page-journal {
+            border-right: 6px solid rgba(48, 25, 13, 0.25);
+            border-left: none;
+            border-radius: 16px 2px 2px 16px;
+        }
+        .back.page-journal::before {
+            left: auto;
+            right: 0;
+            background: linear-gradient(to left, rgba(40, 20, 10, 0.15), transparent);
+        }
+
+        .page-content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            justify-content: space-between;
+        }
+
+        /* 🪄 DESTRUIDOR DE BORDAS BRANCAS E DESTAQUE TOTAL DA IMAGEM */
+        .polaroid-frame {
+            width: 95%;
+            height: 200px;
+            background-color: #ebd1a0; /* Mescla com o diário se sobrar algo */
+            margin: 8px auto;
+            display: flex;
+            position: relative;
+            /* Ênfase com borda de rascunho de nanquim e sombra pesada */
+            border: 4px solid #1c0e0b;
+            box-shadow: 6px 8px 18px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .polaroid-frame img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important; /* Corta e preenche o espaço sem deixar NENHUMA borda branca */
+            display: block;
+            mix-blend-mode: multiply; 
+            filter: contrast(1.1) sepia(0.12);
+        }
+        
+        .angle-left { transform: rotate(-2deg); }
+        .angle-right { transform: rotate(1.5deg); }
+
+        /* Símbolos Alquímicos Espalhados */
+        .alchemy-symbol {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #912218;
+            border-radius: 50%;
+            opacity: 0.25;
+            pointer-events: none;
+        }
+        .top-right-symbol { top: -15px; right: -15px; }
+        .top-left-symbol { top: -10px; left: -15px; transform: rotate(45deg); }
+        .bottom-right-symbol { bottom: -15px; right: -10px; width: 75px; height: 75px; border-style: double; }
+
+        .aside-note {
+            font-family: 'Caveat', cursive;
+            font-size: 16px;
+            font-weight: bold;
+            position: absolute;
+            color: #912218;
+            transform: rotate(-4deg);
+        }
+
+        /* ==========================================================================
+           5. TIPOGRAFIA E CALIGRAFIA DO AUTOR
+           ========================================================================== */
+        .marker-title {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 22px;
+            color: #261311;
+            text-align: center;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .cursive-subtitle {
+            font-family: 'Caveat', cursive;
+            font-size: 20px;
+            color: #1a1a1a;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .journal-paragraph {
+            font-family: 'Caveat', cursive;
+            font-size: 20px;
+            line-height: 1.25;
+            color: #22120c;
+            text-align: justify;
+            font-weight: bold;
+        }
+
+        /* Desenhos Marginais Secundários */
+        .sketches-container {
+            position: absolute;
+            left: -10px;
+            top: 120px;
+            opacity: 0.25;
+            pointer-events: none;
+        }
+        .eye-sketch {
+            width: 35px;
+            height: 35px;
+            border: 2.5px solid #000;
+            border-radius: 50% 0 50% 0;
+            transform: rotate(45deg);
+            position: relative;
+        }
+        .eye-sketch::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #000;
+            border-radius: 50%;
+            top: 9px; left: 9px;
+        }
+
+        .journal-list {
+            font-family: 'Caveat', cursive;
+            list-style: none;
+            font-size: 19px;
+            font-weight: bold;
+            margin-left: 5px;
+            color: #331b16;
+        }
+        del { color: #912218; text-decoration-thickness: 2.5px; }
+
+        .cryptogram-box {
+            background: rgba(0, 0, 0, 0.05);
+            border: 2px dashed #7a5e3c;
+            padding: 5px;
+            border-radius: 4px;
+            margin: 4px 0;
+        }
+        .crypto-code {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: #7a1d17;
+            text-align: center;
+        }
+
+        .text-red { color: #912218 !important; }
+        .text-gold { color: #cca21b !important; }
+        .text-white { color: #f4ecd8 !important; }
+        .text-center { text-align: center; }
+        
+        .page-num { 
+            position: absolute; 
+            bottom: 10px; 
+            font-family: 'Special Elite', monospace; 
+            font-size: 11px; 
+            color: #634d34; 
+        }
+        .front .page-num { right: 20px; }
+        .back .page-num { left: 20px; }
+
+        /* ==========================================================================
+           6. DESIGN DE ABAS ESPECIAIS (BILL CIPHER & OLHO CEGO)
+           ========================================================================== */
+        .bill-page {
+            background-color: #dec285;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(139,69,19,0.15) 0%, transparent 80%),
+                url('https://www.transparenttextures.com/patterns/parchment.png');
+        }
+        .bill-silhouette {
+            position: absolute;
+            right: 25px;
+            top: 45px;
+            width: 70px;
+            height: 70px;
+            background-color: rgba(145, 34, 24, 0.12);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transform: rotate(12deg);
+        }
+
+        .blind-eye-page {
+            background-color: #e3caa1;
+        }
+        .blind-eye-logo {
+            width: 60px;
+            height: 45px;
+            border: 3px solid #912218;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            opacity: 0.4;
+        }
+        .blind-eye-logo::after {
+            content: 'X';
+            position: absolute;
+            font-family: 'Permanent Marker', cursive;
+            color: #912218;
+            font-size: 24px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* ==========================================================================
+           7. FORMULÁRIOS INTERATIVOS E MINI-JOGOS
+           ========================================================================== */
+        .interactive-input-zone {
+            display: flex;
+            gap: 8px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        .interactive-input-zone input {
+            flex: 1;
+            padding: 8px;
+            font-family: 'Special Elite', monospace;
+            font-size: 12px;
+            border: 3px solid #422d17;
+            background-color: #f7edd6;
+            border-radius: 4px;
+            outline: none;
+        }
+        .interactive-input-zone button {
+            padding: 0 14px;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 12px;
+            background-color: #912218;
+            color: #ebd1a0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .hidden-msg {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.8s ease-in-out;
+        }
+        .hidden-msg.reveal {
+            max-height: 180px;
+            opacity: 1;
+            padding: 8px;
+            border: 2px dashed #912218;
+            background: rgba(145, 34, 24, 0.05);
+            margin-top: 5px;
+        }
+
+        /* Mini-jogo: Painel do Fusível do Dipper */
+        .clone-puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin: 8px 0;
+        }
+        .clone-node {
+            background-color: #f7edd6;
+            border: 2px solid #5c3f26;
+            border-radius: 4px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 16px;
+            color: #422d17;
+            cursor: pointer;
+            user-select: none;
+        }
+        .clone-node.selected {
+            background-color: #912218;
+            color: #ebd1a0;
+            border-color: #261311;
+        }
+
+        .heart-beating {
+            font-size: 45px;
+            text-align: center;
+            animation: heartbeat 1.4s infinite;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.18); }
+        }
+        .signature-text {
+            font-family: 'Permanent Marker', cursive;
+            font-size: 18px;
+            color: #cca21b;
+            text-align: right;
+            transform: rotate(-1deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="audio-controller" id="audioToggle">
+        <div class="tape-icon"></div>
+        <span id="audioStatus">TOCAR MÚSICA</span>
+    </div>
+    
+    <audio id="bgMusic" loop>
+    <source src="/videoplayback.m4a" type="audio/mpeg">
+</audio>
+
+    <div class="book-container">
+        <div class="book">
+            
+            <div class="page">
+                <div class="front cover"></div>
+                <div class="back page-journal" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div class="alchemy-symbol top-right-symbol"></div>
+                    <h2 class="marker-title text-red">PROPRIEDADE DE:</h2>
+                    <div class="polaroid-frame no-flip angle-right">
+                        <img src="https://cdn.discordapp.com/attachments/1260438274309230603/1515138023803850792/d01f4b3f-6c08-4090-bddf-ef655cc057c2.png?ex=6a2de9be&is=6a2c983e&hm=4d1221541bd501effb9bb720d1295166710509e4a24f9b32a99bb978dcc936ec" alt="Início">
+                    </div>
+                    <p class="journal-paragraph text-center" style="padding: 10px 15px 0 15px;">
+                        CUIDADO! Este diário contém segredos e análises sobre a criatura mais espetacular do multiverso: O amor da minha vida.
+                    </p>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="front page-journal">
+                    <div class="page-content">
+                        <div class="alchemy-symbol top-left-symbol"></div>
+                        <span class="aside-note" style="top: 8px; right: 15px;">Eles nunca piscam??</span>
+                        
+                        <h2 class="marker-title">"OLHOS APAIXONADOS"</h2>
+                        <h3 class="cursive-subtitle">Estão a observar-me?</h3>
+                        
+                        <div class="sketches-container">
+                            <div class="eye-sketch"></div>
+                            <div class="eye-sketch" style="transform: rotate(20deg) scale(0.75); margin-top: -5px; margin-left: 15px;"></div>
+                        </div>
+
+                        <ul class="journal-list no-flip" style="margin-top: 10px;">
+                            <li>• Dilatam 100% quando te aproximas.</li>
+                            <li>• Brilho intenso inexplicável pela física.</li>
+                            <li><del>• Conseguem desviar o olhar de ti.</del></li>
+                        </ul>
+
+                        <div class="polaroid-frame no-flip angle-left">
+                            <img src="https://cdn.discordapp.com/attachments/1260438274309230603/1515138521239654522/image.png?ex=6a2dea35&is=6a2c98b5&hm=bfd89df9baa027f6b9ae39eb5eb33d08a827b142a705b68a99f07eef3761868a" alt="Olhos Flutuantes">
+                        </div>
+                        
+                        <p class="journal-paragraph">
+                            É difícil decifrar. O poder do olhar dela destrói instantaneamente qualquer lógica científica que eu tente construir neste laboratório.
+                        </p>
+                        <span class="page-num">1</span>
+                    </div>
+                </div>
+                
+                <div class="back page-journal">
+                    <div class="page-content">
+                        <h2 class="marker-title">FREQUÊNCIA DO SORRISO</h2>
+                        <div class="polaroid-frame no-flip angle-right">
+                            <img src="https://cdn.discordapp.com/attachments/1260438274309230603/1515143736831643789/image.png?ex=6a2def10&is=6a2c9d90&hm=74ab921bad59da2358881b6c84acdf4f2b678e185897e86f2dca6bc93c83ac00" alt="Foto 2">
+                        </div>
+                        <p class="journal-paragraph" style="margin-top: 5px;">
+                            Pesquisas de campo apontam que o teu sorriso emite uma frequência magnética capaz de estabilizar anomalias e falhas temporais no meu peito.
+                        </p>
+                        <div class="cryptogram-box no-flip">
+                            <p class="crypto-code">16-18-15-3-21-18-1-14-4-15 22-15-3-5</p>
+                        </div>
+                        <span class="page-num">2</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="front page-journal blind-eye-page">
+                    <div class="page-content">
+                        <span class="aside-note" style="top: 15px; left: 15px; color: #000;">Apagar memórias?</span>
+                        <h2 class="marker-title">SOCIEDADE DO OLHO CEGO</h2>
+                            <img src="https://preview.redd.it/blind-eye-society-the-secret-alliance-of-sorcerers-from-v0-6qdyrsvbn8sb1.png?width=666&format=png&auto=webp&s=b421cc52c54cf647ec66976e38c0bcbfb14dfaac">
+                        <div class="blind-eye-logo"></div>
+                        
+                        <p class="journal-paragraph" style="margin-top: 10px;">
+                            Eles usam uma pistola de plasma para apagar memórias indesejadas da cidade. Mas se tentassem apagar o que sinto por ti, a máquina certamente sobrecarregaria e explodiria.
+                        </p>
+                        
+                        <div class="cryptogram-box no-flip">
+                            <p class="crypto-code">lqhvtxhflyho</p>
+                        </div>
+                        <span class="page-num">3</span>
+                    </div>
+                </div>
+                
+                <div class="back page-journal bill-page">
+                    <div class="page-content">
+                        <div class="bill-silhouette"></div>
+                        <h2 class="marker-title text-red">AMEAÇA APOCALÍPTICA!</h2>
+                        <h3 class="cursive-subtitle">O Cipher tentou invadir...</h3>
+                        
+                        <p class="journal-paragraph">
+                            O triângulo demônio dos sonhos tentou cruzar a fenda da nossa realidade para plantar dúvidas e causar o Weirdmageddon na nossa história...
+                        </p>
+
+                        <div class="polaroid-frame no-flip angle-left">
+                            <img src="https://s.aficionados.com.br/imagens/nightmare.jpg" alt="Bill Cipher">
+                        </div>
+                        <span class="page-num">4</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="front page-journal">
+                    <div class="page-content">
+                        <h2 class="marker-title">A CIFRA DE VIGENÈRE</h2>
+                        <p class="journal-paragraph">
+                            O diário revela que o Bill escondeu uma mensagem distorcida na floresta. Para decifrar, você deve usar a chave mágica que é o nome da portadora do suéter de estrela cadente da série:
+                        </p>
+                        
+                        <div class="cryptogram-box no-flip">
+                            <p class="crypto-code" style="font-size: 14px; color: #912218;">CÓDIGO: QMFEP ME YQE</p>
+                        </div>
+
+                        <div class="interactive-input-zone no-flip">
+                            <input type="text" id="vigenereInput" placeholder="Chave secreta em MAIÚSCULO..." autocomplete="off">
+                            <button id="vigenereBtn">Decifrar</button>
+                        </div>
+                        
+                        <div id="vigenereMessage" class="hidden-msg no-flip">
+                            <p class="text-red text-center" style="font-weight: bold;">✦ TRADUZIDO ✦</p>
+                            <p class="text-center" style="font-size: 17px; font-family: 'Caveat', cursive; font-weight: bold;">"VOCE ME SALVOU"</p>
+                        </div>
+                        <span class="page-num">5</span>
+                    </div>
+                </div>
+
+                <div class="back page-journal">
+                    <div class="page-content">
+                        <h2 class="marker-title">ANOMALIA: GNOMOS</h2>
+                        <div class="polaroid-frame no-flip angle-right">
+                            <img src="https://static.wikia.nocookie.net/umveraodemisterios/images/f/f0/Gnomo_Monstro.png/revision/latest?cb=20121002180343&path-prefix=pt-br" alt="Gnomo">
+                        </div>
+                        <p class="journal-paragraph">
+                            Eles procuram incansavelmente uma nova rainha para o trono deles na floresta. Mas já avisei que a rainha deste diário já governa um reino absoluto bem aqui no meu peito. Schmebulock!
+                        </p>
+                        <span class="page-num">6</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="front page-journal">
+                    <div class="page-content">
+                        <h2 class="marker-title">MÁQUINA DE CLONES</h2>
+                        <p class="journal-paragraph">
+                            As cópias do laboratório falharam catastroficamente. Para estabilizar a energia estática do portal tridimensional, selecione abaixo os três números primos corretos do sistema:
+                        </p>
+                        
+                        <div class="clone-puzzle-grid no-flip">
+                            <div class="clone-node" data-val="4">4</div>
+                            <div class="clone-node" data-val="7">7</div>
+                            <div class="clone-node" data-val="12">12</div>
+                            <div class="clone-node" data-val="13">13</div>
+                            <div class="clone-node" data-val="15">15</div>
+                            <div class="clone-node" data-val="19">19</div>
+                        </div>
+
+                        <div id="cloneMessage" class="hidden-msg no-flip">
+                            <p class="text-red text-center" style="font-weight: bold;">⚡ SISTEMA ALINHADO ⚡</p>
+                            <p style="font-size: 16px; text-align: center; font-family: 'Caveat', cursive; font-weight: bold;">
+                                Não existem clones, duplicatas ou universos paralelos com alguém que chegue perto do seu brilho.
+                            </p>
+                        </div>
+                        <span class="page-num">7</span>
+                    </div>
+                </div>
+
+                <div class="back page-journal">
+                    <div class="page-content">
+                        <div class="alchemy-symbol top-right-symbol"></div>
+                        <h2 class="marker-title">ANOMALIA Nº 1002</h2>
+                        <h3 class="cursive-subtitle">O Efeito do Teu Abraço</h3>
+                        
+                        <p class="journal-paragraph">
+                            Sempre que os teus braços me envolvem, o tempo ao redor desacelera exatamente 45%. Os relógios de Gravity Falls enlouquecem, mas eu finalmente encontro abrigo e paz.
+                        </p>
+
+                        <div class="polaroid-frame no-flip angle-left">
+                            <img src="https://cdn.discordapp.com/attachments/1260438274309230603/1515145733584453783/6982b267-46d5-4c42-9b85-c9e4b0754e6a.png?ex=6a2df0ec&is=6a2c9f6c&hm=a8a91fc54abad34fd89c9cfd5761e6c5ab3c798bfc8df4cfe0efadb62c109e3c" alt="Abraço">
+                        </div>
+                        <span class="page-num">8</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="front page-journal">
+                    <div class="page-content">
+                        <h2 class="marker-title">LINHAS DE DESTINO</h2>
+                        <p class="journal-paragraph">
+                            Mapeando todos os caminhos do multiverso através dos portais interdimensionais, o resultado matemático é invariável: Nós fomos feitos para nos encontrar.
+                        </p>
+                        
+                        <div style="text-align: center; color: #a32218; font-size: 26px;" class="no-flip">♾️ ─── ✨ ─── ♾️</div>
+
+                        <div class="polaroid-frame no-flip angle-right">
+                            <img src="https://lh3.googleusercontent.com/rd-gg-dl/AFfU-fJK-1Mfc_0OPtSupa0MugeP-tyFSCbK0fUjnokojN2Da35ZMvIq_JHQ4xwLWb8lwTuXUZ2f2N1SDSjTtnMICwA91DLNddnFPCEOG--S85GKQ1EogZIOpx3r2EGZ-dJ9PjF0J3itAVCVv7N2w5Hl-6NFh5-5mmp864rsK4ZWzTiYNkTjzR_ptciKxQ4UT5ise2sM-3dUeUOhbsIU43Li6I44NdfynRlvm3rKceV--siCfuCeUCYpdb3UAaXoD1AYaOJz1UsJRGyDpragQyzSSjKzuCd1FKzcECYMi4y0f787aY9u_csbZI0aYuj0GC81HaHX108eNS4sm7XKecrRGmPJwS3MocdFmyuauEc9zEOCAW3f4alhGML_ju8ML-bXl_99gCxq7EPr9diOGbCXOiiMql6srNbf-I7CUgZbw1GkTA3YSHkbOl2R15Yw1ec29IGYgB2y2C96Dj2uZNudsAI-WMdOTqVF7tqiabM0FSsMJdA2__1YfhFED_owakGyOe9KuNrnDJtvWwy9BRaRqsunV_uHFmDtHP2g22Jl5oGAugTepexoU8laK54WsyTLrsT9Ku4h6nBsRrO8kBFKr_CVwnfwBowmrpiPl4AU8LJUU_RkWzONPqrymrjBBpa4X_1x6wvsDWMB6cpkkO7qPwLDxvLeRtGGN8UAkVnmyB99oebq4cx9YBLv1XE5OPNH4CoF24KLHbYzEtoXiWv3OGrTQOn00CUUtzr_cMqYr3_yK9LuYY0gcA2GXCwcYfBIMBGrqYcfHmLondrCrGA-g-q-DR6VTiLQ5ISK1s0PE-KhwFUtYc_k-kJYved2Kb3ZFqdrhnJYbVw6Yp0YIKaJFD7DaNcZ2nQ09EOlKFKKKul8fR9IwKWoMZfZKgZy29eV5rgGtjAG136V1ebaOIPm3u6Y7GmPjIkkM0rJpRLw_BBfpPK7lV45YkLfQ02WPVAc5ThgFi3r88mujRLhWi86KFsJKIjshFgJrArd1Mf-ae80fYB5AVO1PhmlPvDhxzzHtDi6BTUgB0O6_UkGe0G4jrkJcAdFO6eErOohIcjF9JOJhai2o9ixLwgNnAdCzGHPzQLXqc_p2AXh0b_USykipzdzq0fe8StJtS0GM8Ypn1Jj6_VEVLoCcjURhrCxrPG77bC_kxA67awzfxso0XJ8rbwMqH60LIur_AKKbBAkXiGxxzhVe7yL5_QnqweLv0zPlzM7etOH8OCE2dUMTeN7i9NS7BHkkTa-qi0II6ARp0TekawDL3e7jMtblse7YZJiksmcOvwnQluswNQAL5g7zy28tFRNxg=s1600" alt="Destino">
+                        </div>
+                        <span class="page-num">9</span>
+                    </div>
+                </div>
+                
+                <div class="back page-journal">
+                    <div class="page-content">
+                        <h2 class="marker-title">DECODIFICADOR SEGRETO</h2>
+                        <p class="journal-paragraph text-center">
+                            Digite a senha mística abaixo para descriptografar a verdade oculta do Autor:
+                        </p>
+                        
+                        <div class="interactive-input-zone no-flip">
+                            <input type="text" id="loveInput" placeholder="Dica: frase de 3 palavras..." autocomplete="off">
+                            <button id="checkBtn">Decodificar</button>
+                        </div>
+                        
+                        <div id="secretMessage" class="hidden-msg no-flip">
+                            <p class="text-red text-center" style="font-weight: bold;">✦ REVELADO ✦</p>
+                            <p style="font-size: 15px; text-align: justify; line-height: 1.25;">
+                                "Desde o momento em que te conheci, meu universo encontrou uma constante exata. Tu és o meu maior mistério e a minha resposta favorita de todas."
+                            </p>
+                        </div>
+                        <span class="page-num">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page">
+                <div class="front page-journal final-back-cover">
+                    <div class="page-content" style="justify-content: center; align-items: center; padding: 10px;">
+                        <h2 class="marker-title text-gold">FIM DO DIÁRIO 3</h2>
+                        <div class="heart-beating no-flip">❤️</div>
+                        <p class="journal-paragraph text-white text-center special-elite-font" style="padding: 0 10px;">
+                            Mistérios são de fato fascinantes, mas a maior certeza absoluta que registrei em todas as minhas anotações é que eu te amo daqui até os confins do multiverso.
+                        </p>
+                        <p class="signature-text" style="width: 100%; padding-right: 20px;">- O Teu Amor</p>
+                        <span class="page-num">11</span>
+                    </div>
+                </div>
+                <div class="back cover" style="transform: rotateY(180deg); border-radius: 24px 4px 4px 24px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const pages = document.querySelectorAll('.page');
+        const interactiveElements = document.querySelectorAll('.no-flip, input, button, .clone-node, .audio-controller');
+        let totalPages = pages.length;
+
+        // Protege os inputs, botões e nós do jogo para não virar a página ao clicar
+        interactiveElements.forEach(element => {
+            element.addEventListener('click', (e) => { e.stopPropagation(); });
+            element.addEventListener('touchstart', (e) => { e.stopPropagation(); });
+        });
+
+        // Controle dos Z-index e animação de virada de folha
+        function setupPages() {
+            pages.forEach((page, index) => {
+                page.style.zIndex = totalPages - index;
+                
+                page.addEventListener('click', () => {
+                    if (!page.classList.contains('flipped')) {
+                        page.classList.add('flipped');
+                        setTimeout(() => {
+                            page.style.zIndex = index + 1;
+                        }, 350);
+                    } else {
+                        page.classList.remove('flipped');
+                        setTimeout(() => {
+                            page.style.zIndex = totalPages - index;
+                        }, 350);
+                    }
+                });
+            });
+        }
+
+        setupPages();
+
+        // 🎵 MECÂNICA DO TOCA-FITAS (ÁUDIO)
+        const audioToggle = document.getElementById('audioToggle');
+        const bgMusic = document.getElementById('bgMusic');
+        const audioStatus = document.getElementById('audioStatus');
+        let isPlaying = false;
+
+        audioToggle.addEventListener('click', () => {
+            if (!isPlaying) {
+                bgMusic.play().then(() => {
+                    audioStatus.textContent = "MUTAR MÚSICA";
+                    audioToggle.style.background = "#7a1d17";
+                    isPlaying = true;
+                }).catch(err => console.log("Áudio bloqueado pelo navegador, precisa de interação do usuário primeiro."));
+            } else {
+                bgMusic.pause();
+                audioStatus.textContent = "TOCAR MÚSICA";
+                audioToggle.style.background = "#2b1612";
+                isPlaying = false;
+            }
+        });
+
+        // 📝 JOGO 1: Senha secreta "eu te amo"
+        const checkBtn = document.getElementById('checkBtn');
+        const loveInput = document.getElementById('loveInput');
+        const secretMessage = document.getElementById('secretMessage');
+
+        checkBtn.addEventListener('click', () => {
+            const resposta = loveInput.value.trim().toLowerCase();
+            if (resposta === "eu te amo") {
+                secretMessage.classList.add('reveal');
+                loveInput.style.borderColor = "#27ae60";
+            } else {
+                alert("Código incorreto! Examine os mistérios e tente novamente...");
+                loveInput.style.borderColor = "#c0392b";
+            }
+        });
+
+        // 🧩 JOGO 2: Cifra de Vigenère ("mabel")
+        const vigenereBtn = document.getElementById('vigenereBtn');
+        const vigenereInput = document.getElementById('vigenereInput');
+        const vigenereMessage = document.getElementById('vigenereMessage');
+
+        vigenereBtn.addEventListener('click', () => {
+            if (vigenereInput.value.trim().toUpperCase() === "MABEL") {
+                vigenereMessage.classList.add('reveal');
+                vigenereInput.style.borderColor = "#27ae60";
+            } else {
+                alert("Chave incorreta! Quem é a dona do porquinho Waddles?");
+                vigenereInput.style.borderColor = "#c0392b";
+            }
+        });
+
+        // 🧬 JOGO 3: Puzzle de Lógica dos Números Primos (7, 13, 19)
+        const nodes = document.querySelectorAll('.clone-node');
+        const cloneMessage = document.getElementById('cloneMessage');
+        let selectedValues = [];
+
+        nodes.forEach(node => {
+            node.addEventListener('click', () => {
+                const val = parseInt(node.getAttribute('data-val'));
+                
+                if (node.classList.contains('selected')) {
+                    node.classList.remove('selected');
+                    selectedValues = selectedValues.filter(v => v !== val);
+                } else {
+                    if (selectedValues.length < 3) {
+                        node.classList.add('selected');
+                        selectedValues.push(val);
+                    }
+                }
+
+                if (selectedValues.length === 3) {
+                    if (selectedValues.includes(7) && selectedValues.includes(13) && selectedValues.includes(19)) {
+                        cloneMessage.classList.add('reveal');
+                    } else {
+                        setTimeout(() => {
+                            alert("Fusíveis incorretos! O laboratório disparou um alarme de sobrecarga.");
+                            nodes.forEach(n => n.classList.remove('selected'));
+                            selectedValues = [];
+                        }, 200);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
